@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PawPulse: smart dog bed and collar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Manrope:wght@400;500;700&family=Lexend:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF4F2;--surface:#FFFFFF;--ink:#12272D;--muted:#51666C;--line:#D5E1DE;--accent:#2F6F6A;--accent-ink:#FFFFFF;--warn:#D9482B;--warn-bg:#FCE9E4;--night:#12272D;--night-ink:#E8F1EF;
+--display:"Bricolage Grotesque","Trebuchet MS",sans-serif;--body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0D1B1F;--surface:#15292F;--ink:#E8F1EF;--muted:#9DB3B3;--line:#27403F;--accent:#6FC2B8;--accent-ink:#0D1B1F;--warn:#FF8D72;--warn-bg:#3A2019;--night:#081316}}
+:root[data-theme="dark"]{--bg:#0D1B1F;--surface:#15292F;--ink:#E8F1EF;--muted:#9DB3B3;--line:#27403F;--accent:#6FC2B8;--accent-ink:#0D1B1F;--warn:#FF8D72;--warn-bg:#3A2019;--night:#081316}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1.0625rem/1.6 var(--body);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);line-height:1.08;margin:0;letter-spacing:-.02em}
+h1{font-size:clamp(2.4rem,6vw,4.3rem);font-weight:800}
+h2{font-size:clamp(1.8rem,4vw,2.7rem);font-weight:800}
+h3{font-size:1.2rem;font-weight:600;letter-spacing:-.01em}
+p{margin:0}a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+section{padding:80px 0}
+.lead{color:var(--muted);max-width:56ch;font-size:1.1rem}
+.cap{color:var(--muted);font-size:.88rem}
+.btn{display:inline-block;background:var(--accent);color:var(--accent-ink);font:700 1rem var(--body);padding:14px 26px;border-radius:999px;border:0;text-decoration:none;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+header.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px)}
+header.nav::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:66px;gap:12px}
+.logo{font:800 1.3rem var(--display);text-decoration:none}
+.nav nav{display:flex;gap:6px;align-items:center}
+.nav nav a{text-decoration:none;color:var(--muted);font-weight:600;font-size:.95rem;padding:8px 16px;border-radius:999px}
+.nav nav a[aria-current="page"]{background:var(--ink);color:var(--bg)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:24px}
+.view[hidden]{display:none}
+.hero{padding:52px 0 80px}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+.hero h1{margin-bottom:20px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+@media(max-width:860px){.hero .wrap,.feat,.buy .wrap{grid-template-columns:1fr!important}}
+.dial{display:flex;gap:22px;align-items:center}
+.dial svg{flex:none;width:130px;height:130px}
+.ring-bg{stroke:var(--line)}.ring{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset 1s ease}
+.num{font:800 2.6rem var(--display)}
+.alert{margin-top:16px;background:var(--warn-bg);border-radius:16px;padding:14px 16px;display:flex;gap:12px;font-size:.95rem;line-height:1.5}
+.alert b{color:var(--warn)}
+.alert.ok{background:color-mix(in srgb,var(--accent) 14%,transparent)}.alert.ok b{color:var(--accent)}
+.problem{background:var(--night);color:#E8F1EF}
+.problem .lead,.problem span{color:#A9C0BE}
+.problem h2{max-width:20ch;margin-bottom:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px}
+.grid3>div{border-top:1.5px solid #3A5655;padding-top:14px}
+.grid3 b{font:800 1.5rem var(--display);display:block;margin-bottom:6px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:36px}
+.step{padding:22px;border-radius:20px;background:var(--surface);border:1px solid var(--line)}
+.step p{color:var(--muted);font-size:.95rem;margin-top:8px}.step .ico{font-size:1.8rem;margin-bottom:10px}
+@media(max-width:900px){.grid4{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.grid4,.grid3{grid-template-columns:1fr}}
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;padding:30px 0}
+.feat .txt p,.feat ul{color:var(--muted)}.feat .txt p{margin-top:12px}.feat ul{padding-left:20px;margin:16px 0 0}
+.bars{display:flex;align-items:flex-end;gap:8px;height:110px;margin:10px 0}
+.bars i{flex:1;background:var(--accent);border-radius:8px 8px 3px 3px;opacity:.85}.bars i.low{background:var(--warn);opacity:1}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.chips span{padding:9px 18px;border-radius:999px;border:1.5px solid var(--line);font-weight:600;font-size:.95rem}
+.who{background:var(--surface)}
+.buy .wrap{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start}
+.price{font:800 3rem var(--display);margin:14px 0 2px}.price small{font:500 1rem var(--body);color:var(--muted)}
+.incl{list-style:none;padding:0;margin:18px 0 0}.incl li{padding:9px 0;border-top:1px solid var(--line);display:flex;gap:10px}.incl li::before{content:"✓";color:var(--accent);font-weight:800}
+.buy label{display:block;font-weight:700;margin-bottom:8px}
+.buy input,.buy select{width:100%;font:inherit;padding:13px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);margin-bottom:16px}
+.buy .btn{width:100%}#msg{margin:12px 0;font-weight:600;min-height:1.5em}
+details{border-top:1px solid var(--line);padding:16px 0}details:last-of-type{border-bottom:1px solid var(--line)}
+summary{font:600 1.1rem var(--display);cursor:pointer}details p{color:var(--muted);margin-top:8px;max-width:64ch}
+footer{padding:30px 0 46px;color:var(--muted);font-size:.88rem}
+/* dashboard */
+.dash{padding:40px 0 70px}
+.pair{max-width:520px;margin:30px auto 0;text-align:center}
+.pair ul{list-style:none;padding:0;margin:22px 0;text-align:left}
+.pair li{display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line);color:var(--muted)}
+.pair li.on{color:var(--ink)}.pair li.on .st{color:var(--accent);font-weight:700}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--accent);margin-right:8px;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:22px}
+.dog{display:flex;gap:16px;align-items:center}.avatar{width:62px;height:62px;border-radius:50%;background:var(--accent);display:grid;place-items:center;font-size:2rem}
+.dog p{color:var(--muted);font-size:.92rem}
+.status{font-size:.9rem;color:var(--muted)}
+.dg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:960px){.dg{grid-template-columns:1fr 1fr}}@media(max-width:520px){.dg{grid-template-columns:1fr}}
+.m{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px}
+.m .l{color:var(--muted);font-size:.85rem}.m .v{font:800 1.9rem var(--display);margin:4px 0 2px}.m .v small{font:500 .9rem var(--body);color:var(--muted)}
+.m .s{font-size:.82rem;color:var(--muted)}.m .s.bad{color:var(--warn);font-weight:700}
+.m.wide{grid-column:span 2}.m.big{grid-column:span 2;grid-row:span 2}
+@media(max-width:520px){.m.wide,.m.big{grid-column:auto;grid-row:auto}}
+.grp{margin:28px 0 12px;font:800 1.15rem var(--display)}
+.live{width:100%;height:80px}.live path{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linejoin:round}
+.sw{display:flex;gap:3px;height:34px;margin-top:10px;border-radius:8px;overflow:hidden}.sw i{flex:1}
+.tools{display:flex;gap:10px;flex-wrap:wrap}
+.tabbar{display:none}
+.pair .fld{text-align:left}.pair label{display:block;font-weight:700;margin:14px 0 6px}.pair input{width:100%;font:inherit;padding:13px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink)}
+.badge{display:inline-block;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent);font:700 .78rem var(--body);padding:3px 10px;border-radius:999px}
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.ag .card h3{margin-bottom:10px}
+.rw{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:.95rem}.rw span:first-child{color:var(--muted)}.rw span:last-child{text-align:right;font-weight:600}
+.tg{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:.95rem}.tg input{width:20px;height:20px;accent-color:var(--accent)}
+@media(max-width:760px){.ag{grid-template-columns:1fr}}
+html{font-size:calc(100% * var(--z,1))}main:focus{outline:none}
+.nav .wrap{height:auto;min-height:66px;padding-top:6px;padding-bottom:6px}
+header.nav{border-bottom:1px solid var(--line)}
+.hero{background:radial-gradient(900px 420px at 88% -10%,color-mix(in srgb,var(--accent) 24%,transparent),transparent 70%),radial-gradient(620px 360px at -5% 25%,color-mix(in srgb,#8FB8E8 26%,transparent),transparent 70%)}
+.problem{background:radial-gradient(700px 320px at 92% 0%,#245B58 0%,transparent 70%),var(--night)}
+.who{background:linear-gradient(180deg,var(--surface),color-mix(in srgb,var(--accent) 8%,var(--surface)))}
+.card,.step,.m{box-shadow:0 18px 40px -26px color-mix(in srgb,var(--accent) 60%,transparent)}
+.step .ico{width:52px;height:52px;border-radius:16px;background:color-mix(in srgb,var(--accent) 14%,transparent);display:grid;place-items:center}
+.btn{transition:transform .15s,box-shadow .15s}.btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px -12px var(--accent)}.btn.ghost:hover{box-shadow:none}
+.ecg{width:100%;height:34px;margin-bottom:12px}.ecg path{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:0;animation:ecg 3.4s ease-out infinite}@keyframes ecg{0%{stroke-dashoffset:1}60%,100%{stroke-dashoffset:0}}
+.skip{position:absolute;left:12px;top:-70px;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:100}.skip:focus{top:calc(8px + env(safe-area-inset-top,0px))}
+.a11y-btn{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--ink);color:var(--bg);border:0;border-radius:999px;padding:12px 18px;font:700 .95rem var(--body);cursor:pointer;box-shadow:0 10px 30px -10px rgba(0,0,0,.5)}
+#a11y{position:fixed;right:20px;bottom:calc(80px + env(safe-area-inset-bottom,0px));z-index:60;width:min(360px,calc(100vw - 32px));max-height:min(78vh,640px);overflow:auto;background:var(--surface);border:1.5px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 24px 60px -20px rgba(0,0,0,.45)}
+#a11y[hidden]{display:none}
+.ah{display:flex;justify-content:space-between;align-items:center}.ah button{background:none;border:1.5px solid var(--line);color:var(--ink);width:42px;height:42px;border-radius:50%;font-size:1rem;cursor:pointer}
+.al{font-weight:700;font-size:.85rem;color:var(--muted);margin:14px 0 8px}
+.seg{display:flex;gap:6px}.seg button{flex:1;min-height:44px;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;font:700 .9rem var(--body);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;min-height:46px;margin-top:8px;padding:10px 14px;border:1.5px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font:600 .95rem var(--body);cursor:pointer;text-align:left}
+.opt[data-k]::after{content:"Off";color:var(--muted);font-weight:700;font-size:.85rem}.opt[data-k][aria-pressed="true"]::after{content:"On";color:var(--accent)}.opt[aria-pressed="true"]{border-color:var(--accent)}
+@media(max-width:640px){.a11y-btn{right:12px;bottom:calc(78px + env(safe-area-inset-bottom,0px));padding:10px 14px}#a11y{left:0;right:0;bottom:0;width:auto;max-height:82vh;border-radius:24px 24px 0 0;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}}
+:root[data-dys="1"]{--display:"Lexend","Trebuchet MS",sans-serif;--body:"Lexend","Trebuchet MS",sans-serif}
+[data-dys="1"] body{letter-spacing:.025em;word-spacing:.1em;line-height:1.85}
+[data-dys="1"] h1,[data-dys="1"] h2,[data-dys="1"] h3{letter-spacing:0;line-height:1.25}
+[data-sp="1"] body{line-height:2;letter-spacing:.04em;word-spacing:.16em}[data-sp="1"] li{margin-bottom:.4em}
+[data-ul="1"] a:not(.btn):not(.logo){text-decoration:underline!important;text-underline-offset:3px;text-decoration-thickness:2px}
+[data-rm="1"],[data-rm="1"] *,[data-rm="1"] *::before{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+.dev{display:grid;grid-template-columns:1fr 1.1fr;gap:44px;align-items:center;padding:40px 0;border-top:1px solid var(--line)}.dev.rev .fig{order:2}
+.fig{margin:0;border-radius:28px;padding:22px;background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface));border:1px solid var(--line)}.fig svg{width:100%;height:auto;display:block}.fig figcaption{text-align:center;margin-top:8px}
+.dev h3{font-size:2rem}.dev .lead{margin-top:10px;font-size:1.02rem}
+.sub{font:700 .85rem var(--body);color:var(--muted);margin:20px 0 8px}
+.dev ul{margin:0;padding-left:20px;color:var(--muted)}.dev li{margin-bottom:6px}
+.dev .chips{margin-top:0}.spec{margin-top:20px}
+.together{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:10px 0 30px}.together div{padding:20px;border-radius:20px;border:1px solid var(--line);background:var(--surface)}.together p{color:var(--muted);font-size:.95rem;margin-top:6px}
+@media(max-width:860px){.dev{grid-template-columns:1fr;gap:22px}.dev.rev .fig{order:0}.together{grid-template-columns:1fr}}
+[data-hc="1"] .fig{background:var(--bg)}
+.lang{display:flex;gap:4px;border:1.5px solid var(--line);border-radius:999px;padding:3px;flex:none}.lang button{border:0;background:transparent;color:var(--muted);font:700 .85rem var(--body);padding:8px 12px;min-width:44px;min-height:38px;border-radius:999px;cursor:pointer}.lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+body{overflow-x:clip}button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.rw span{min-width:0}.rw span:last-child{overflow-wrap:anywhere}svg{max-width:100%}#a11y{overscroll-behavior:contain}.hero .wrap>*,.dev>*,.buy .wrap>*{min-width:0}
+@media(max-width:640px){.nav .wrap{justify-content:space-between}.rw{flex-direction:column;gap:2px}.rw span:last-child{text-align:left}.chips span{font-size:.9rem;padding:8px 14px}}
+@media(max-width:640px){:root{padding-top:0}html{scroll-padding-top:0}header.nav{position:static;height:0;border:0;background:none;backdrop-filter:none}header.nav::before{display:none}.nav .wrap{display:contents}.nav .logo,.nav nav{display:none}.lang{position:fixed;left:12px;bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--surface);box-shadow:0 10px 30px -12px rgba(0,0,0,.5)}.tabbar a{position:relative;z-index:1}}
+:root[data-hc="1"]{--bg:#FFFFFF;--surface:#FFFFFF;--ink:#000000;--muted:#1F1F1F;--line:#000000;--accent:#0B4F4A;--accent-ink:#FFFFFF;--warn:#9C1C00;--warn-bg:#FFE3DC}
+:root[data-hc="1"][data-theme="dark"]{--bg:#000;--surface:#000;--ink:#fff;--muted:#EDEDED;--line:#fff;--accent:#7FF0E2;--accent-ink:#000;--warn:#FFB09E;--warn-bg:#2A0F08}
+@media (prefers-color-scheme:dark){:root[data-hc="1"]:not([data-theme="light"]){--bg:#000;--surface:#000;--ink:#fff;--muted:#EDEDED;--line:#fff;--accent:#7FF0E2;--accent-ink:#000;--warn:#FFB09E;--warn-bg:#2A0F08}}
+[data-hc="1"] .card,[data-hc="1"] .step,[data-hc="1"] .m{border-width:2px;box-shadow:none}
+[data-hc="1"] .hero,[data-hc="1"] .who{background:var(--bg)}
+[data-hc="1"] .problem{background:#000;color:#fff}[data-hc="1"] .problem .lead,[data-hc="1"] .problem span{color:#fff}
+[data-hc="1"] :focus-visible{outline:4px solid var(--ink);outline-offset:3px}
+@media(max-width:640px){
+body{font-size:1rem;padding-bottom:84px}
+.wrap{padding:0 16px}
+section{padding:48px 0}
+.nav .wrap{height:56px;justify-content:center}
+.nav nav{display:none}
+h1{font-size:2.15rem}h2{font-size:1.7rem}
+.hero{padding:28px 0 48px}.hero .wrap{gap:28px}
+.lead{font-size:1rem}
+.cta{flex-direction:column}.cta .btn,.btn{width:100%;text-align:center;min-height:50px}
+.card{padding:18px;border-radius:20px}
+.dial svg{width:104px;height:104px}.num{font-size:2.2rem}
+.grid4{grid-template-columns:1fr 1fr;gap:12px}.step{padding:16px}.step .ico{font-size:1.5rem}
+.feat{gap:20px;padding:20px 0}
+.price{font-size:2.4rem}
+.top{flex-direction:column;align-items:stretch}
+.tools{flex-direction:column;align-items:stretch}
+.tools .btn{min-height:46px}
+.dg{grid-template-columns:1fr 1fr;gap:10px}
+.m{padding:14px;border-radius:16px}.m .v{font-size:1.5rem}.m .l{font-size:.8rem}
+.m.wide,.m.big{grid-column:span 2;grid-row:auto}
+.grp{margin:22px 0 10px}
+.pair{margin-top:10px}
+.tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));gap:8px}
+.tabbar a{flex:1;text-align:center;text-decoration:none;font:700 .9rem var(--body);color:var(--muted);padding:12px 8px;border-radius:14px;min-height:48px}
+.tabbar a[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<button class="a11y-btn" id="a11yBtn" type="button" aria-expanded="false" aria-controls="a11y"><span aria-hidden="true">Aa</span> Accessibility</button>
+<div id="a11y" role="dialog" aria-label="Accessibility settings" hidden>
+<div class="ah"><h3>Accessibility</h3><button id="a11yClose" type="button" aria-label="Close accessibility settings">✕</button></div>
+<p class="al">Text size</p><div class="seg"><button type="button" data-k="z" data-v="0" aria-label="Normal text">A</button><button type="button" data-k="z" data-v="1" aria-label="Large text">A+</button><button type="button" data-k="z" data-v="2" aria-label="Larger text">A++</button><button type="button" data-k="z" data-v="3" aria-label="Largest text">A+++</button></div>
+<p class="al">Theme</p><div class="seg"><button type="button" data-k="th" data-v="auto">Auto</button><button type="button" data-k="th" data-v="light">Light</button><button type="button" data-k="th" data-v="dark">Dark</button></div>
+<p class="al">Reading</p>
+<button class="opt" type="button" data-k="dys">Dyslexia-friendly font</button>
+<button class="opt" type="button" data-k="sp">Extra text spacing</button>
+<button class="opt" type="button" data-k="hc">High contrast</button>
+<button class="opt" type="button" data-k="ul">Underline all links</button>
+<button class="opt" type="button" data-k="rm">Reduce motion</button>
+<button class="opt" type="button" id="a11yRead">Read this page aloud</button>
+<button class="opt" type="button" id="a11yReset" style="justify-content:center">Reset all settings</button>
+</div>
+<header class="nav"><div class="wrap">
+<a class="logo" href="#overview">PawPulse</a>
+<nav aria-label="Pages"><a href="#overview" data-v="overview">Overview</a><a href="#devices" data-v="devices">Our devices</a><a href="#dashboard" data-v="dashboard">MyPet</a><a href="#account" data-v="account">Account</a></nav>
+<div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="uk" aria-pressed="false">UA</button></div>
+</div></header>
+
+<main id="main" tabindex="-1">
+<div class="view" id="v-overview">
+<section class="hero"><div class="wrap">
+<div>
+<h1>Know something’s wrong with your dog before they show it</h1>
+<p class="lead">A smart collar tracks activity by day. A smart bed tracks sleep and breathing by night. Together they score your dog’s health daily and warn you about changes you can’t see yet.</p>
+<div class="cta"><a class="btn" href="#buy" data-scroll>Pre-order the bundle</a><a class="btn ghost" href="#dashboard">Open the MyPet app</a></div>
+<p class="cap" style="margin-top:16px">Think smartwatch and sleep tracker, but for your dog.</p>
+</div>
+<div class="card" aria-label="App preview"><svg class="ecg" viewBox="0 0 300 40" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M0 22 H70 L80 22 L88 6 L98 36 L106 14 L112 22 H170 L180 22 L188 6 L198 36 L206 14 L212 22 H300"/></svg>
+<div class="dial"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-bg" cx="60" cy="60" r="50" fill="none" stroke-width="12"/><circle class="ring" cx="60" cy="60" r="50" fill="none" stroke-width="12" transform="rotate(-90 60 60)" stroke-dasharray="314" stroke-dashoffset="50"/></svg>
+<div><div class="num">8.4</div><div class="cap">Health Score today, out of 10</div></div></div>
+<div class="alert"><b>!</b><p>Sleeping breathing rate is up 25%. This may point to pain or a heart problem.</p></div>
+</div></div></section>
+
+<section class="problem"><div class="wrap">
+<h2>Dogs hide pain. Data doesn’t.</h2>
+<p class="lead">By the time symptoms are visible, the problem is often well along. We move pet care from reacting to illness to preventing it.</p>
+<div class="grid3">
+<div><b>Sleep</b><span>Early signs of pain and heart trouble often show up first in night-time breathing and restlessness.</span></div>
+<div><b>Activity</b><span>Shorter walks and slower get-ups are easy to miss from one day to the next.</span></div>
+<div><b>Trends</b><span>A single number says little. Weeks of data show what changed for your dog.</span></div>
+</div></div></section>
+
+<section><div class="wrap">
+<h2>Two devices. One health picture.</h2>
+<p style="margin-top:10px"><a href="#devices"><strong>Explore the devices</strong></a></p>
+<div class="grid4">
+<div class="step"><div class="ico">🐕</div><h3>Collar</h3><p>Steps, play, rest, heart rate and walk quality.</p></div>
+<div class="step"><div class="ico">🛏️</div><h3>Bed</h3><p>Contactless sensors under an orthopedic mattress read breathing, movement and sleep depth.</p></div>
+<div class="step"><div class="ico">🧠</div><h3>AI analytics</h3><p>Learns your dog’s own baseline and flags drift from it, not from a breed average.</p></div>
+<div class="step"><div class="ico">📲</div><h3>You and your vet</h3><p>Daily score, alerts and a report you can hand to your vet.</p></div>
+</div></div></section>
+
+<section style="padding-top:10px"><div class="wrap">
+<div class="feat">
+<div class="txt"><h2 style="font-size:2rem">Health Score</h2>
+<p>A daily 1 to 10 rating built from combined collar and bed data. One clear number instead of a dozen charts.</p>
+<ul><li>Blends activity, sleep, breathing and calm</li><li>Compared to your dog, not an average dog</li><li>Weekly and monthly trends</li></ul></div>
+<div class="card"><div class="bars" aria-hidden="true"><i style="height:78%"></i><i style="height:82%"></i><i style="height:80%"></i><i style="height:84%"></i><i style="height:76%"></i><i style="height:70%"></i><i class="low" style="height:58%"></i></div><p class="cap">A slow decline over 7 days, visible before behavior changes</p></div>
+</div>
+<div class="feat">
+<div class="txt"><h2 style="font-size:2rem">Early Warning System</h2>
+<p>Alerts in plain language when something drifts from normal. We don’t diagnose, we tell you when it’s worth calling the vet.</p>
+<ul><li>Three levels: good to know, keep watching, see your vet</li><li>Explains exactly what changed</li><li>One tap to share with your vet</li></ul></div>
+<div>
+<div class="alert" style="margin-top:0"><b>!</b><p>Sleeping breathing rate is up 25%. This may point to pain or a heart problem.</p></div>
+<div class="alert"><b>!</b><p>Max changed position often for 3 nights in a row. Possible joint discomfort.</p></div>
+<div class="alert ok"><b>✓</b><p>Deep sleep has been normal for 14 days. Keep it up.</p></div>
+</div></div>
+</div></section>
+
+<section class="who"><div class="wrap">
+<h2>Built for owners who want to know sooner</h2>
+<div class="chips"><span>Senior dogs</span><span>French and English bulldogs</span><span>Dachshunds, corgis, Labradors</span><span>Dogs with heart conditions</span><span>Post-surgery recovery</span></div>
+<div class="cta"><a class="btn" href="#dashboard">See what the app shows</a></div>
+</div></section>
+
+<section class="buy" id="buy"><div class="wrap">
+<div>
+<h2>The PawPulse bundle</h2>
+<p class="lead" style="margin-top:12px">Collar and bed are sold together because only together do they show the full picture.</p>
+<div class="price">$249 <small>hardware bundle</small></div>
+<p class="cap">Plus $9 a month for AI analytics and vet reports (first 3 months free)</p>
+<ul class="incl"><li>Smart collar with activity and heart sensors</li><li>Smart bed with sleep and breathing sensors</li><li>App with Health Score and alerts</li><li>Monthly vet-ready health reports</li><li>Pre-order discount: 20% off</li></ul>
+</div>
+<div class="card">
+<h3 style="margin-bottom:16px">Reserve your spot</h3>
+<label for="em">Email</label><input id="em" type="email" placeholder="you@example.com" autocomplete="email">
+<label for="sz">Dog size</label><select id="sz"><option>Small (under 22 lb)</option><option>Medium (22–55 lb)</option><option>Large (55+ lb)</option></select>
+<button class="btn" id="go" type="button">Pre-order with 20% off</button>
+<p id="msg" role="status"></p>
+<p class="cap">You aren’t charged until your bundle is ready to ship.</p>
+</div></div></section>
+
+<section style="padding-top:20px"><div class="wrap">
+<h2 style="margin-bottom:22px">Questions</h2>
+<details><summary>Does this replace the vet?</summary><p>No. PawPulse spots changes and tells you when to book a visit. Only a vet can diagnose.</p></details>
+<details><summary>Is the collar safe to wear all day?</summary><p>It’s lightweight, built for 24/7 wear, and sized to your dog’s weight.</p></details>
+<details><summary>What if my dog won’t use the bed?</summary><p>It’s a soft orthopedic bed. If your dog doesn’t take to it within 30 days, you get a refund.</p></details>
+<details><summary>How long until it learns my dog?</summary><p>A personal baseline takes about 2 weeks. Alerts get sharper every week after.</p></details>
+</div></section>
+</div>
+
+<div class="view" id="v-dashboard" hidden>
+<div class="wrap dash">
+<div id="login"><div class="pair card"><span class="badge">Demo account</span><h2 style="font-size:2rem;margin-top:12px">Sign in to PawPulse</h2><p class="lead" style="margin:10px auto 0">The fields are pre-filled with a fake account. Nothing is sent anywhere.</p>
+<div class="fld"><label for="lgEm">Email</label><input id="lgEm" type="email" value="anna.kovalenko@example.com" autocomplete="off"><label for="lgPw">Password</label><input id="lgPw" type="password" value="demo-password" autocomplete="off"></div>
+<button class="btn" id="lgBtn" type="button" style="margin-top:22px">Sign in</button></div></div>
+<div id="pairing" hidden>
+<div class="pair card">
+<h2 style="font-size:2rem">Connect your devices</h2>
+<p class="lead" style="margin:10px auto 0">This is a simulated demo. No real devices are needed.</p>
+<ul><li id="p1"><span>PawPulse Collar</span><span class="st">Not connected</span></li><li id="p2"><span>PawPulse Bed</span><span class="st">Not connected</span></li></ul>
+<button class="btn" id="pairBtn" type="button">Connect collar and bed</button>
+</div></div>
+
+<div id="live" hidden>
+<div class="top">
+<div class="dog"><div class="avatar" aria-hidden="true">🐕</div><div><h2 style="font-size:1.8rem">Max</h2><p>Labrador Retriever · 11 years · 31.2 kg</p></div></div>
+<div class="tools"><span class="status"><span class="dot"></span><span id="sync">Live · collar 82% · bed online</span></span>
+<button class="btn ghost" id="anom" type="button" style="padding:8px 18px;font-size:.9rem">Simulate a health change</button></div>
+</div>
+<div id="alerts"></div>
+
+<div class="grp">Overall</div>
+<div class="dg">
+<div class="m big"><div class="l">Health Score</div><div class="v" id="hs" style="font-size:3.6rem">8.4</div><div class="s" id="hsn">Excellent for his age. Up 0.2 from yesterday.</div>
+<svg class="live" id="hrl" viewBox="0 0 300 80" preserveAspectRatio="none" style="margin-top:16px"><path id="hrp" d=""/></svg><div class="s">Heart rate, last minute</div></div>
+<div class="m"><div class="l">Heart rate</div><div class="v"><span id="hr">78</span> <small>bpm</small></div><div class="s">Resting range 60–90</div></div>
+<div class="m"><div class="l">Respiration (resting)</div><div class="v"><span id="rr">19</span> <small>/min</small></div><div class="s" id="rrs">Normal, under 30</div></div>
+<div class="m"><div class="l">Body temperature</div><div class="v"><span id="tp">38.5</span> <small>°C</small></div><div class="s">Estimated from skin</div></div>
+<div class="m"><div class="l">Stress level</div><div class="v" id="st">Low</div><div class="s">Based on heart variability</div></div>
+</div>
+
+<div class="grp">Collar · Activity</div>
+<div class="dg">
+<div class="m"><div class="l">Steps today</div><div class="v" id="steps">6,412</div><div class="s">Goal 8,000</div></div>
+<div class="m"><div class="l">Active minutes</div><div class="v"><span id="am">74</span> <small>min</small></div><div class="s">Typical for his age: 70</div></div>
+<div class="m"><div class="l">Distance</div><div class="v"><span id="dist">4.8</span> <small>km</small></div><div class="s">2 walks, 1 play session</div></div>
+<div class="m"><div class="l">Calories burned</div><div class="v"><span id="kcal">412</span> <small>kcal</small></div><div class="s">Active only</div></div>
+<div class="m"><div class="l">Gait symmetry</div><div class="v">96 <small>%</small></div><div class="s">Left and right even</div></div>
+<div class="m"><div class="l">Stand-up speed</div><div class="v">1.4 <small>s</small></div><div class="s">Stable for 2 weeks</div></div>
+<div class="m"><div class="l">Scratching episodes</div><div class="v">6</div><div class="s">Today, normal range</div></div>
+<div class="m"><div class="l">Barking time</div><div class="v">11 <small>min</small></div><div class="s">Below his average</div></div>
+</div>
+
+<div class="grp">Bed · Sleep and rest</div>
+<div class="dg">
+<div class="m wide"><div class="l">Last night’s sleep · 9 h 12 min</div><div class="v">Quality <span id="sq">87</span><small>/100</small></div>
+<div class="sw" aria-label="Sleep stages"><i style="flex:2;background:#8FB8E8"></i><i style="flex:5;background:#2F6F6A"></i><i style="flex:1;background:#E8B54A"></i><i style="flex:4;background:#2F6F6A"></i><i style="flex:2;background:#6C5CD6"></i><i style="flex:3;background:#2F6F6A"></i><i style="flex:1;background:#E8B54A"></i><i style="flex:3;background:#8FB8E8"></i></div>
+<div class="s" style="margin-top:8px">Light · Deep · Awake · REM</div></div>
+<div class="m"><div class="l">Sleeping respiration</div><div class="v"><span id="srr">20</span> <small>/min</small></div><div class="s" id="srs">Baseline 19–22</div></div>
+<div class="m"><div class="l">Restlessness</div><div class="v" id="rl">Low</div><div class="s">4 position changes</div></div>
+<div class="m"><div class="l">Deep sleep</div><div class="v">3 h 05</div><div class="s">34% of the night</div></div>
+<div class="m"><div class="l">Wake-ups</div><div class="v">2</div><div class="s">Usual: 1 to 3</div></div>
+<div class="m"><div class="l">Weight (from bed)</div><div class="v">31.2 <small>kg</small></div><div class="s">Stable for 30 days</div></div>
+<div class="m"><div class="l">Bed temperature</div><div class="v">22 <small>°C</small></div><div class="s">Comfortable</div></div>
+</div>
+<p class="cap" style="margin-top:22px">Simulated data for demonstration only. PawPulse does not diagnose or replace a vet.</p>
+
+</div>
+</div>
+</div>
+<div class="view" id="v-devices" hidden><div class="wrap dash">
+<h2>Our devices</h2>
+<p class="lead" style="margin-top:12px">The collar covers your dog’s day and the bed covers the night. Images are illustrations of the planned design, and specifications are targets for the first release.</p>
+
+<div class="dev">
+<figure class="fig"><svg viewBox="0 0 400 300" role="img" aria-label="Illustration of the Smart Collar"><ellipse cx="200" cy="135" rx="140" ry="88" fill="none" stroke="var(--accent)" stroke-width="24"/><ellipse cx="200" cy="135" rx="140" ry="88" fill="none" stroke="var(--surface)" stroke-width="3" stroke-dasharray="3 9" stroke-opacity=".7"/><rect x="176" y="38" width="48" height="26" rx="7" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/><rect x="150" y="196" width="100" height="62" rx="20" fill="var(--ink)"/><circle cx="178" cy="227" r="9" fill="#5DE08A"/><circle cx="206" cy="227" r="9" fill="#FF5A4F"/><rect x="224" y="219" width="12" height="16" rx="4" fill="var(--accent)"/><circle cx="200" cy="206" r="3" fill="var(--bg)"/></svg><figcaption class="cap">Smart Collar · illustration</figcaption></figure>
+<div>
+<span class="badge">Daytime</span>
+<h3 style="margin-top:10px">Smart Collar</h3>
+<p class="lead">Worn all day, it reads movement and vital signs while your dog runs, plays and rests.</p>
+<p class="sub">Sensors</p>
+<div class="chips"><span>Accelerometer</span><span>Gyroscope</span><span>Pulse oximeter</span><span>Skin temperature sensor</span></div>
+<p class="sub">What it tracks</p>
+<ul><li>Daily activity and steps</li><li>Running and play</li><li>Scratching and head or body shaking</li><li>Breathing rate and heart rate during the active day</li><li>Gait symmetry and stand-up speed</li></ul>
+<p class="sub">Built to last</p>
+<ul><li>Waterproof and safe for swimming</li><li>Hypoallergenic materials</li><li>10–14 days of battery life</li></ul>
+<div class="card spec"><h3 style="font-size:1.1rem;margin-bottom:6px">Collar specifications</h3>
+<div class="rw"><span>Water resistance</span><span>IP68, swim-safe</span></div><div class="rw"><span>Battery life</span><span>10–14 days</span></div><div class="rw"><span>Charging</span><span>Magnetic dock, about 2 h</span></div><div class="rw"><span>Weight</span><span>38 g (S) to 62 g (XL)</span></div><div class="rw"><span>Neck sizes</span><span>25–70 cm, 4 sizes</span></div><div class="rw"><span>Materials</span><span>Medical-grade silicone, nickel-free</span></div><div class="rw"><span>Motion sensing</span><span>6-axis, 100 Hz</span></div><div class="rw"><span>Skin temperature</span><span>±0.1 °C</span></div><div class="rw"><span>Pulse oximeter</span><span>Green and red LED, SpO₂</span></div><div class="rw"><span>Connectivity</span><span>Bluetooth 5.3</span></div><div class="rw"><span>Visibility</span><span>Status LED, reflective stripe</span></div></div>
+</div></div>
+
+<div class="dev rev">
+<figure class="fig"><svg viewBox="0 0 400 280" role="img" aria-label="Top view illustration of the Smart Bed"><rect x="16" y="16" width="368" height="248" rx="70" style="fill:color-mix(in srgb,var(--accent) 22%,var(--surface));stroke:var(--accent);stroke-width:3"/><rect x="52" y="48" width="296" height="184" rx="46" fill="var(--surface)" stroke="var(--line)" stroke-width="2"/><g fill="var(--accent)" opacity=".7"><circle cx="110" cy="96" r="6"/><circle cx="155" cy="96" r="6"/><circle cx="200" cy="96" r="6"/><circle cx="245" cy="96" r="6"/><circle cx="290" cy="96" r="6"/><circle cx="110" cy="140" r="6"/><circle cx="155" cy="140" r="6"/><circle cx="200" cy="140" r="6"/><circle cx="245" cy="140" r="6"/><circle cx="290" cy="140" r="6"/><circle cx="110" cy="184" r="6"/><circle cx="155" cy="184" r="6"/><circle cx="200" cy="184" r="6"/><circle cx="245" cy="184" r="6"/><circle cx="290" cy="184" r="6"/></g><rect x="296" y="232" width="64" height="26" rx="8" fill="var(--ink)"/><circle cx="314" cy="245" r="4" fill="#5DE08A"/></svg><figcaption class="cap">Smart Bed, top view · illustration</figcaption></figure>
+<div>
+<span class="badge">Night-time</span>
+<h3 style="margin-top:10px">Smart Bed</h3>
+<p class="lead">A comfortable orthopedic bed that quietly reads sleep, posture and weight, with no wires near your dog.</p>
+<p class="sub">Sensors</p>
+<div class="chips"><span>Piezoelectric pressure and weight matrix</span><span>Ambient and body thermometers</span><span>Contactless acoustic and vibration monitors</span></div>
+<p class="sub">What it measures</p>
+<ul><li>Sleep quality and sleep stages</li><li>Resting posture. Frequent position changes can point to joint pain or arthritis.</li><li>Precise weight trend over time</li><li>Heartbeat and breathing while resting</li><li>Restlessness and wake-ups</li></ul>
+<p class="sub">Construction</p>
+<ul><li>Removable, washable cover</li><li>Orthopedic memory foam mattress</li><li>Replaceable electronics module</li></ul>
+<div class="card spec"><h3 style="font-size:1.1rem;margin-bottom:6px">Bed specifications</h3>
+<div class="rw"><span>Mattress</span><span>8 cm memory foam</span></div><div class="rw"><span>Sizes</span><span>S 70×50, M 90×65, L 110×80, XL 130×95 cm</span></div><div class="rw"><span>Max load</span><span>70 kg</span></div><div class="rw"><span>Weight accuracy</span><span>±50 g</span></div><div class="rw"><span>Cover</span><span>Machine wash at 40 °C</span></div><div class="rw"><span>Inner liner</span><span>Waterproof</span></div><div class="rw"><span>Electronics module</span><span>Tool-free swap, waterproof</span></div><div class="rw"><span>Power</span><span>USB-C, 24 h backup battery</span></div><div class="rw"><span>Connectivity</span><span>Wi-Fi and Bluetooth 5.3</span></div><div class="rw"><span>Noise</span><span>Silent, no vibration</span></div></div>
+</div></div>
+
+<h2 style="font-size:1.8rem;margin:20px 0 16px">Better together</h2>
+<div class="together"><div><h3>Day and night</h3><p>The collar sees the active day, the bed sees rest. Together they make one Health Score.</p></div><div><h3>No phone needed</h3><p>The collar syncs through the bed when your dog comes home.</p></div><div><h3>One app</h3><p>Everything appears in MyPet, with alerts and vet-ready reports.</p></div></div>
+<div class="cta"><a class="btn" href="#overview" data-scroll>Pre-order the bundle</a><a class="btn ghost" href="#dashboard">Open the MyPet app</a></div>
+</div></div>
+<div class="view" id="v-account" hidden><div class="wrap dash"><div id="acct"></div></div></div>
+</main>
+<footer><div class="wrap"><p><b>PawPulse</b> © 2026. Not a medical device and not a substitute for veterinary advice. Prices and dates are indicative.</p></div></footer>
+<nav class="tabbar" aria-label="Pages"><a href="#overview" data-v="overview">🏠 Overview</a><a href="#devices" data-v="devices">⌚ Devices</a><a href="#dashboard" data-v="dashboard">📊 MyPet</a><a href="#account" data-v="account">👤 Account</a></nav>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+function route(x){var h=typeof x==='string'?x:(location.hash||'#overview').slice(1);var v=(h==='dashboard'||h==='account'||h==='devices')?h:'overview',d=v!=='overview';
+['overview','devices','dashboard','account'].forEach(function(n){$('v-'+n).hidden=n!==v});
+document.querySelectorAll('[data-v]').forEach(function(a){if(a.dataset.v===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+if(!d&&h==='buy'){var b=$('buy');if(b)b.scrollIntoView()}else if(h!=='buy')window.scrollTo(0,0);if(v==='dashboard')gate();if(v==='account')acct()}
+window.addEventListener('hashchange',function(){route()});route();
+function go(n){try{location.hash=n}catch(e){}route(n)}
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a||a.hasAttribute('data-scroll'))return;var n=a.getAttribute('href').slice(1);if(['overview','devices','dashboard','account'].indexOf(n)<0)return;e.preventDefault();go(n)});
+document.querySelectorAll('[data-scroll]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();go('overview');setTimeout(function(){$('buy').scrollIntoView({behavior:'smooth'})},60)})});
+$('go').addEventListener('click',function(){var e=$('em').value.trim(),m=$('msg');
+if(!/^\S+@\S+\.\S+$/.test(e)){m.style.color='var(--warn)';m.textContent='Please enter a valid email.';return}
+m.style.color='var(--accent)';m.textContent='You’re on the list! We’ll email '+e+' before shipping.'});
+var AK='pp-a11y',P={z:0,th:'auto',dys:0,sp:0,hc:0,ul:0,rm:0},ZS=[1,1.15,1.3,1.5],R=document.documentElement,pn=$('a11y'),ab=$('a11yBtn'),rd=$('a11yRead');
+try{var sv=JSON.parse(localStorage.getItem(AK));if(sv)for(var k in sv)P[k]=sv[k]}catch(e){}
+function applyA(){R.style.setProperty('--z',ZS[P.z]||1);
+if(P.th==='auto')R.removeAttribute('data-theme');else R.setAttribute('data-theme',P.th);
+[['dys','data-dys'],['sp','data-sp'],['hc','data-hc'],['ul','data-ul'],['rm','data-rm']].forEach(function(x){if(P[x[0]])R.setAttribute(x[1],'1');else R.removeAttribute(x[1])});
+pn.querySelectorAll('[data-k]').forEach(function(b){var q=b.dataset.k;b.setAttribute('aria-pressed',String(b.dataset.v!==undefined?String(P[q])===b.dataset.v:!!P[q]))});
+try{localStorage.setItem(AK,JSON.stringify(P))}catch(e){}}
+function openA(o){pn.hidden=!o;ab.setAttribute('aria-expanded',String(o));if(o)$('a11yClose').focus();else ab.focus()}
+ab.addEventListener('click',function(){openA(pn.hidden)});$('a11yClose').addEventListener('click',function(){openA(false)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!pn.hidden)openA(false)});
+pn.addEventListener('click',function(e){var b=e.target.closest('[data-k]');if(!b)return;var q=b.dataset.k,v=b.dataset.v;if(v!==undefined)P[q]=q==='z'?+v:v;else P[q]=P[q]?0:1;applyA()});
+$('a11yReset').addEventListener('click',function(){P.z=0;P.th='auto';P.dys=P.sp=P.hc=P.ul=P.rm=0;applyA()});
+function stopRead(){if(window.speechSynthesis)speechSynthesis.cancel();rd.setAttribute('aria-pressed','false');rd.textContent='Read this page aloud'}
+rd.addEventListener('click',function(){var s=window.speechSynthesis;if(!s){rd.textContent='Not supported in this browser';return}
+if(rd.getAttribute('aria-pressed')==='true'){stopRead();return}
+var v=document.querySelector('.view:not([hidden])'),u=new SpeechSynthesisUtterance(v.innerText.replace(/\s+/g,' ').slice(0,3500));u.lang=lang==='uk'?'uk-UA':'en-US';u.onend=stopRead;s.speak(u);rd.setAttribute('aria-pressed','true');rd.textContent='Stop reading'});
+window.addEventListener('hashchange',stopRead);
+/* language switch (EN / UA) */
+var lang='en',M={},V={},RAW=`Skip to content=>Перейти до вмісту
+Accessibility=>Доступність
+Accessibility settings=>Налаштування доступності
+Close accessibility settings=>Закрити налаштування доступності
+Normal text=>Звичайний текст
+Large text=>Великий текст
+Larger text=>Більший текст
+Largest text=>Найбільший текст
+Text size=>Розмір тексту
+Theme=>Тема
+Auto=>Авто
+Light=>Світла
+Dark=>Темна
+Reading=>Читання
+Dyslexia-friendly font=>Шрифт для людей із дислексією
+Extra text spacing=>Більші проміжки в тексті
+High contrast=>Висока контрастність
+Underline all links=>Підкреслювати всі посилання
+Reduce motion=>Менше анімації
+Read this page aloud=>Озвучити сторінку
+Stop reading=>Зупинити озвучення
+Not supported in this browser=>Браузер не підтримує
+Reset all settings=>Скинути налаштування
+Pages=>Сторінки
+Language=>Мова
+Overview=>Огляд
+Our devices=>Наші пристрої
+Account=>Акаунт
+🏠 Overview=>🏠 Огляд
+⌚ Devices=>⌚ Пристрої
+👤 Account=>👤 Акаунт
+Know something’s wrong with your dog before they show it=>Дізнайтеся, що з собакою щось не так, ще до того, як вона це покаже
+A smart collar tracks activity by day. A smart bed tracks sleep and breathing by night. Together they score your dog’s health daily and warn you about changes you can’t see yet.=>Розумний нашийник стежить за активністю вдень, розумний лежак — за сном і диханням уночі. Разом вони щодня оцінюють здоров’я собаки й попереджають про зміни, яких ще не видно.
+Pre-order the bundle=>Передзамовити комплект
+Open the MyPet app=>Відкрити застосунок MyPet
+Think smartwatch and sleep tracker, but for your dog.=>Це як розумний годинник і трекер сну, але для вашої собаки.
+App preview=>Приклад застосунку
+Health Score today, out of 10=>Health Score сьогодні, з 10
+Sleeping breathing rate is up 25%. This may point to pain or a heart problem.=>Частота дихання уві сні зросла на 25%. Це може свідчити про біль або проблеми із серцем.
+Dogs hide pain. Data doesn’t.=>Собаки приховують біль. Дані — ні.
+By the time symptoms are visible, the problem is often well along. We move pet care from reacting to illness to preventing it.=>Коли симптоми помітні, проблема часто вже зайшла далеко. Ми переходимо від реакції на хворобу до її профілактики.
+Sleep=>Сон
+Early signs of pain and heart trouble often show up first in night-time breathing and restlessness.=>Перші ознаки болю й проблем із серцем часто проявляються в нічному диханні та неспокої.
+Activity=>Активність
+Shorter walks and slower get-ups are easy to miss from one day to the next.=>Коротші прогулянки й повільніші підйоми легко проґавити з дня на день.
+Trends=>Тренди
+A single number says little. Weeks of data show what changed for your dog.=>Одна цифра мало що каже. Тижні даних показують, що змінилося саме для вашої собаки.
+Two devices. One health picture.=>Два пристрої. Одна картина здоров’я.
+Explore the devices=>Дізнатися про пристрої
+Collar=>Нашийник
+Steps, play, rest, heart rate and walk quality.=>Кроки, ігри, відпочинок, пульс і якість прогулянок.
+Bed=>Лежак
+Contactless sensors under an orthopedic mattress read breathing, movement and sleep depth.=>Безконтактні датчики під ортопедичним матрацом зчитують дихання, рухи та глибину сну.
+AI analytics=>AI-аналітика
+Learns your dog’s own baseline and flags drift from it, not from a breed average.=>Вивчає норму саме вашої собаки й помічає відхилення від неї, а не від середнього по породі.
+You and your vet=>Ви й ваш ветеринар
+Daily score, alerts and a report you can hand to your vet.=>Щоденна оцінка, сповіщення та звіт, який можна показати ветеринару.
+A daily 1 to 10 rating built from combined collar and bed data. One clear number instead of a dozen charts.=>Щоденна оцінка від 1 до 10 на основі даних нашийника та лежака. Одна зрозуміла цифра замість десятка графіків.
+Blends activity, sleep, breathing and calm=>Поєднує активність, сон, дихання та спокій
+Compared to your dog, not an average dog=>Порівнюється з вашою собакою, а не із середньою
+Weekly and monthly trends=>Тижневі та місячні тренди
+A slow decline over 7 days, visible before behavior changes=>Повільне зниження за 7 днів, помітне ще до змін у поведінці
+Alerts in plain language when something drifts from normal. We don’t diagnose, we tell you when it’s worth calling the vet.=>Сповіщення простою мовою, коли щось відхиляється від норми. Ми не ставимо діагнозів, а підказуємо, коли варто звернутися до ветеринара.
+Three levels: good to know, keep watching, see your vet=>Три рівні: до відома, стежте далі, час до ветеринара
+Explains exactly what changed=>Пояснює, що саме змінилося
+One tap to share with your vet=>Одним дотиком поділитися з ветеринаром
+Max changed position often for 3 nights in a row. Possible joint discomfort.=>Max часто змінював позу три ночі поспіль. Можливий дискомфорт у суглобах.
+Deep sleep has been normal for 14 days. Keep it up.=>Глибокий сон у нормі вже 14 днів. Так тримати.
+Built for owners who want to know sooner=>Для власників, які хочуть знати раніше
+Senior dogs=>Старші собаки
+French and English bulldogs=>Французькі й англійські бульдоги
+Dachshunds, corgis, Labradors=>Таси, коргі, лабрадори
+Dogs with heart conditions=>Собаки із серцевими діагнозами
+Post-surgery recovery=>Відновлення після операцій
+See what the app shows=>Подивитися, що показує застосунок
+The PawPulse bundle=>Комплект PawPulse
+Collar and bed are sold together because only together do they show the full picture.=>Нашийник і лежак продаються разом, бо лише разом дають повну картину.
+hardware bundle=>комплект пристроїв
+Plus $9 a month for AI analytics and vet reports (first 3 months free)=>Плюс $9 на місяць за AI-аналітику та звіти для ветеринара (перші 3 місяці безкоштовно)
+Smart collar with activity and heart sensors=>Розумний нашийник із датчиками активності та пульсу
+Smart bed with sleep and breathing sensors=>Розумний лежак із датчиками сну та дихання
+App with Health Score and alerts=>Застосунок із Health Score та сповіщеннями
+Monthly vet-ready health reports=>Місячні звіти про здоров’я для ветеринара
+Pre-order discount: 20% off=>Знижка на передзамовлення: –20%
+Reserve your spot=>Займіть своє місце
+Email=>Електронна пошта
+Dog size=>Розмір собаки
+Small (under 22 lb)=>Малий (до 10 кг)
+Medium (22–55 lb)=>Середній (10–25 кг)
+Large (55+ lb)=>Великий (25+ кг)
+Pre-order with 20% off=>Передзамовити зі знижкою 20%
+You aren’t charged until your bundle is ready to ship.=>Гроші не списуються, поки комплект не буде готовий до відправки.
+Please enter a valid email.=>Введіть коректну електронну пошту.
+Questions=>Питання
+Does this replace the vet?=>Це замінює ветеринара?
+No. PawPulse spots changes and tells you when to book a visit. Only a vet can diagnose.=>Ні. PawPulse помічає зміни й підказує, коли записатися на візит. Діагноз ставить лише ветеринар.
+Is the collar safe to wear all day?=>Чи безпечно носити нашийник увесь день?
+It’s lightweight, built for 24/7 wear, and sized to your dog’s weight.=>Він легкий, розрахований на цілодобове носіння й підбирається за вагою собаки.
+What if my dog won’t use the bed?=>Що, як собака не буде користуватися лежаком?
+It’s a soft orthopedic bed. If your dog doesn’t take to it within 30 days, you get a refund.=>Це м’який ортопедичний лежак. Якщо собака не звикне до нього за 30 днів, ми повернемо кошти.
+How long until it learns my dog?=>Скільки часу потрібно, щоб система вивчила мою собаку?
+A personal baseline takes about 2 weeks. Alerts get sharper every week after.=>Персональна норма формується приблизно за 2 тижні. Далі сповіщення стають точнішими щотижня.
+The collar covers your dog’s day and the bed covers the night. Images are illustrations of the planned design, and specifications are targets for the first release.=>Нашийник охоплює день собаки, а лежак — ніч. Зображення — це ілюстрації запланованого дизайну, а характеристики — цілі для першого випуску.
+Smart Collar · illustration=>Smart Collar · ілюстрація
+Smart Bed, top view · illustration=>Smart Bed, вигляд зверху · ілюстрація
+Daytime=>Удень
+Night-time=>Уночі
+Worn all day, it reads movement and vital signs while your dog runs, plays and rests.=>Його носять увесь день, і він зчитує рухи та життєві показники, поки собака бігає, грається й відпочиває.
+Sensors=>Датчики
+What it tracks=>Що відстежує
+Built to last=>Розрахований на тривале використання
+Accelerometer=>Акселерометр
+Gyroscope=>Гіроскоп
+Pulse oximeter=>Пульсоксиметр
+Skin temperature sensor=>Датчик температури шкіри
+Daily activity and steps=>Щоденна активність і кроки
+Running and play=>Біг та ігри
+Scratching and head or body shaking=>Чухання та струшування головою чи тілом
+Breathing rate and heart rate during the active day=>Частота дихання та серцебиття під час активного дня
+Gait symmetry and stand-up speed=>Симетрія ходи та швидкість підйому
+Waterproof and safe for swimming=>Водонепроникний, безпечний для плавання
+Hypoallergenic materials=>Гіпоалергенні матеріали
+10–14 days of battery life=>10–14 днів роботи від батареї
+Collar specifications=>Характеристики нашийника
+Water resistance=>Захист від води
+Battery life=>Час роботи батареї
+Charging=>Зарядка
+Weight=>Вага
+Neck sizes=>Розміри шиї
+Materials=>Матеріали
+Motion sensing=>Відстеження рухів
+Skin temperature=>Температура шкіри
+Pulse oximeter=>Пульсоксиметр
+Connectivity=>Зв’язок
+Visibility=>Помітність
+IP68, swim-safe=>IP68, безпечний для плавання
+10–14 days=>10–14 днів
+Magnetic dock, about 2 h=>Магнітна док-станція, близько 2 год
+38 g (S) to 62 g (XL)=>від 38 г (S) до 62 г (XL)
+25–70 cm, 4 sizes=>25–70 см, 4 розміри
+Medical-grade silicone, nickel-free=>Медичний силікон, без нікелю
+6-axis, 100 Hz=>6 осей, 100 Гц
+Green and red LED, SpO₂=>Зелений і червоний LED, SpO₂
+Bluetooth 5.3=>Bluetooth 5.3
+Status LED, reflective stripe=>Світлодіод стану, світловідбивна смужка
+A comfortable orthopedic bed that quietly reads sleep, posture and weight, with no wires near your dog.=>Зручний ортопедичний лежак, який непомітно зчитує сон, позу та вагу, без проводів біля собаки.
+Piezoelectric pressure and weight matrix=>П’єзоелектрична матриця тиску й ваги
+Ambient and body thermometers=>Термометри середовища та тіла
+Contactless acoustic and vibration monitors=>Безконтактні акустичні та вібраційні монітори
+What it measures=>Що вимірює
+Sleep quality and sleep stages=>Якість і фази сну
+Resting posture. Frequent position changes can point to joint pain or arthritis.=>Пози під час відпочинку. Часта зміна пози може вказувати на біль у суглобах чи артрит.
+Precise weight trend over time=>Точна динаміка ваги
+Heartbeat and breathing while resting=>Серцебиття та дихання під час відпочинку
+Restlessness and wake-ups=>Неспокій і пробудження
+Construction=>Конструкція
+Removable, washable cover=>Знімний чохол, що пере́деться
+Orthopedic memory foam mattress=>Ортопедичний матрац Memory Foam
+Replaceable electronics module=>Змінний блок електроніки
+Bed specifications=>Характеристики лежака
+Mattress=>Матрац
+Sizes=>Розміри
+Max load=>Макс. навантаження
+Weight accuracy=>Точність ваги
+Cover=>Чохол
+Inner liner=>Внутрішній вкладиш
+Electronics module=>Блок електроніки
+Power=>Живлення
+Noise=>Шум
+8 cm memory foam=>8 см Memory Foam
+S 70×50, M 90×65, L 110×80, XL 130×95 cm=>S 70×50, M 90×65, L 110×80, XL 130×95 см
+70 kg=>70 кг
+±50 g=>±50 г
+Machine wash at 40 °C=>Прання при 40 °C
+Waterproof=>Водонепроникний
+Tool-free swap, waterproof=>Заміна без інструментів, водонепроникний
+USB-C, 24 h backup battery=>USB-C, резервна батарея на 24 год
+Wi-Fi and Bluetooth 5.3=>Wi-Fi та Bluetooth 5.3
+Silent, no vibration=>Безшумний, без вібрації
+Better together=>Разом краще
+Day and night=>День і ніч
+The collar sees the active day, the bed sees rest. Together they make one Health Score.=>Нашийник бачить активний день, лежак — відпочинок. Разом вони дають одну оцінку Health Score.
+No phone needed=>Телефон не потрібен
+The collar syncs through the bed when your dog comes home.=>Нашийник синхронізується через лежак, коли собака вдома.
+One app=>Один застосунок
+Everything appears in MyPet, with alerts and vet-ready reports.=>Усе з’являється в MyPet разом зі сповіщеннями та звітами для ветеринара.
+Demo account=>Демо-акаунт
+Sign in to PawPulse=>Вхід у PawPulse
+The fields are pre-filled with a fake account. Nothing is sent anywhere.=>Поля заповнені фальшивим акаунтом. Нічого нікуди не надсилається.
+Password=>Пароль
+Sign in=>Увійти
+Signing in…=>Входимо…
+Connect your devices=>Підключіть пристрої
+This is a simulated demo. No real devices are needed.=>Це симуляція. Справжні пристрої не потрібні.
+PawPulse Collar=>Нашийник PawPulse
+PawPulse Bed=>Лежак PawPulse
+Not connected=>Не підключено
+Connect collar and bed=>Підключити нашийник і лежак
+Searching for devices…=>Пошук пристроїв…
+Syncing data…=>Синхронізація даних…
+Connected · 82%=>Підключено · 82%
+Connected · online=>Підключено · онлайн
+Labrador Retriever · 11 years · 31.2 kg=>Лабрадор-ретривер · 11 років · 31,2 кг
+Live · collar 82% · bed online=>Наживо · нашийник 82% · лежак онлайн
+Simulate a health change=>Симулювати зміну здоров’я
+Back to normal=>Повернути норму
+Overall=>Загальне
+Collar · Activity=>Нашийник · Активність
+Bed · Sleep and rest=>Лежак · Сон і відпочинок
+Excellent for his age. Up 0.2 from yesterday.=>Чудово для його віку. На 0,2 більше, ніж учора.
+Lower than usual. Down 2.3 over 5 days.=>Нижче звичного. Мінус 2,3 за 5 днів.
+Heart rate, last minute=>Пульс за останню хвилину
+Heart rate=>Пульс
+bpm=>уд/хв
+Resting range 60–90=>Норма в спокої 60–90
+Respiration (resting)=>Дихання (у спокої)
+/min=>/хв
+Normal, under 30=>Норма, до 30
+Higher than usual=>Вище за звичне
+Body temperature=>Температура тіла
+Estimated from skin=>Оцінка за шкірою
+Stress level=>Рівень стресу
+Low=>Низький
+Elevated=>Підвищений
+Based on heart variability=>За варіабельністю пульсу
+Steps today=>Кроки сьогодні
+Goal 8,000=>Мета 8 000
+Active minutes=>Активні хвилини
+min=>хв
+Typical for his age: 70=>Типово для його віку: 70
+Distance=>Дистанція
+km=>км
+2 walks, 1 play session=>2 прогулянки, 1 гра
+Calories burned=>Спалено калорій
+kcal=>ккал
+Active only=>Лише активні
+Gait symmetry=>Симетрія ходи
+Left and right even=>Ліва й права рівні
+Stand-up speed=>Швидкість підйому
+s=>с
+Stable for 2 weeks=>Стабільно 2 тижні
+Scratching episodes=>Епізоди чухання
+Today, normal range=>Сьогодні, у межах норми
+Barking time=>Час гавкання
+Below his average=>Нижче за його середнє
+Last night’s sleep · 9 h 12 min=>Сон минулої ночі · 9 год 12 хв
+Quality=>Якість
+Sleep stages=>Фази сну
+Light · Deep · Awake · REM=>Легкий · Глибокий · Неспання · REM
+Sleeping respiration=>Дихання уві сні
+Baseline 19–22=>Норма 19–22
+Up 25% vs baseline=>На 25% вище за норму
+Restlessness=>Неспокій
+High=>Високий
+4 position changes=>4 зміни пози
+Deep sleep=>Глибокий сон
+3 h 05=>3 год 05 хв
+34% of the night=>34% ночі
+Wake-ups=>Пробудження
+Usual: 1 to 3=>Зазвичай: 1–3
+Weight (from bed)=>Вага (з лежака)
+kg=>кг
+Stable for 30 days=>Стабільно 30 днів
+Bed temperature=>Температура лежака
+Comfortable=>Комфортно
+Simulated data for demonstration only. PawPulse does not diagnose or replace a vet.=>Симульовані дані лише для демонстрації. PawPulse не ставить діагнозів і не замінює ветеринара.
+Early warning:=>Раннє попередження:
+Sleeping breathing rate rose 25% over 5 nights, with more restlessness and a higher resting heart rate. This may point to pain or a heart problem. Consider booking a vet visit and sharing the report.=>Частота дихання уві сні зросла на 25% за 5 ночей, більше неспокою й вищий пульс у спокої. Це може свідчити про біль або проблеми із серцем. Розгляньте візит до ветеринара та поділіться звітом.
+All readings are within Max’s normal range. Deep sleep has been steady for 14 days.=>Усі показники в межах норми Max. Глибокий сон стабільний уже 14 днів.
+You’re signed out=>Ви вийшли з акаунта
+Sign in with the demo account to see your profile, devices and reports.=>Увійдіть у демо-акаунт, щоб побачити профіль, пристрої та звіти.
+Sign out=>Вийти
+Subscription=>Підписка
+Plan=>Тариф
+Price=>Ціна
+$9 / month=>$9 / місяць
+Member since=>З нами з
+Aug 3, 2026=>3 серпня 2026
+Next payment=>Наступний платіж
+Dec 12, 2026=>12 грудня 2026
+My dog=>Моя собака
+Name=>Ім’я
+Breed=>Порода
+Labrador Retriever=>Лабрадор-ретривер
+Age and weight=>Вік і вага
+11 years · 31.2 kg=>11 років · 31,2 кг
+Known conditions=>Відомі діагнози
+Mild hip arthritis=>Легкий артрит тазостегнових суглобів
+Devices=>Пристрої
+Collar PP-C-48213=>Нашийник PP-C-48213
+Collar firmware=>Прошивка нашийника
+Bed PP-B-20977=>Лежак PP-B-20977
+Bed firmware=>Прошивка лежака
+Online=>Онлайн
+Vet sharing=>Обмін із ветеринаром
+Vet=>Ветеринар
+Clinic=>Клініка
+Send weekly report on Mondays=>Надсилати тижневий звіт по понеділках
+Notifications=>Сповіщення
+Early warnings (push)=>Раннє попередження (push)
+Daily Health Score summary=>Щоденний підсумок Health Score
+Low battery=>Низький заряд
+Health reports=>Звіти про здоров’я
+October 2026=>Жовтень 2026
+September 2026=>Вересень 2026
+August 2026=>Серпень 2026
+PDF · avg score 8.2=>PDF · середня оцінка 8,2
+PDF · avg score 8.3=>PDF · середня оцінка 8,3
+PDF · avg score 8.1=>PDF · середня оцінка 8,1
+Fake account for demonstration only. No data is stored or sent.=>Фальшивий акаунт лише для демонстрації. Дані не зберігаються й не надсилаються.
+© 2026. Not a medical device and not a substitute for veterinary advice. Prices and dates are indicative.=>© 2026. Не є медичним пристроєм і не замінює консультацію ветеринара. Ціни й дати орієнтовні.`;
+RAW.split('\n').forEach(function(l){var i=l.indexOf('=>');if(i>0){var a=l.slice(0,i),b=l.slice(i+2);M[a]=b;if(!V[b])V[b]=a}});
+function X(s){var m=s.match(/^(\s*)([\s\S]*?)(\s*)$/),k=m[2],d=lang==='uk'?M:V,t=d[k];
+if(t===undefined){if(lang==='uk'){var e=k.match(/^You’re on the list! We’ll email (.+) before shipping\.$/);if(e)return m[1]+'Ви в списку! Ми напишемо на '+e[1]+' перед відправленням.'+m[3]}return null}
+return m[1]+t+m[3]}
+function tx(n){var p=n.parentNode&&n.parentNode.nodeName;if(p==='SCRIPT'||p==='STYLE')return;var r=X(n.nodeValue);if(r!==null&&r!==n.nodeValue)n.nodeValue=r}
+function walk(root){var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),n,L=[];while((n=w.nextNode()))L.push(n);L.forEach(tx);
+root.querySelectorAll('[aria-label]').forEach(function(e){var r=X(e.getAttribute('aria-label'));if(r!==null)e.setAttribute('aria-label',r)})}
+new MutationObserver(function(ms){if(lang!=='uk')return;ms.forEach(function(m){if(m.type==='characterData')tx(m.target);else m.addedNodes.forEach(function(a){if(a.nodeType===3)tx(a);else if(a.nodeType===1)walk(a)})})}).observe(document.body,{childList:true,subtree:true,characterData:true});
+function setLang(l){lang=l;R.lang=l;document.title=l==='uk'?'PawPulse: розумний лежак і нашийник для собак':'PawPulse: smart dog bed and collar';walk(document.body);var mg=$('msg');if(mg)mg.textContent='';
+document.querySelectorAll('[data-lang]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.lang===l))});try{localStorage.setItem('pp-lang',l)}catch(e){}}
+document.querySelector('.lang').addEventListener('click',function(e){var b=e.target.closest('[data-lang]');if(b&&b.dataset.lang!==lang)setLang(b.dataset.lang)});
+var sl='en';try{sl=localStorage.getItem('pp-lang')||'en'}catch(e){}
+if(sl==='uk')setLang('uk');
+applyA();
+var user=null,paired=false;
+function gate(){var a=!!user;$('login').hidden=a;$('pairing').hidden=!a||paired;$('live').hidden=!a||!paired}
+function acct(){var el=$('acct');
+if(!user){el.innerHTML='<div class="pair card"><h2 style="font-size:2rem">You’re signed out</h2><p class="lead" style="margin:10px auto 18px">Sign in with the demo account to see your profile, devices and reports.</p><a class="btn" href="#dashboard">Sign in</a></div>';return}
+el.innerHTML=`<div class="top"><div class="dog"><div class="avatar" style="font:800 1.3rem var(--display);color:var(--accent-ink)">AK</div><div><h2 style="font-size:1.8rem">Anna Kovalenko</h2><p>anna.kovalenko@example.com <span class="badge">Demo account</span></p></div></div><button class="btn ghost" id="so" type="button" style="padding:10px 22px">Sign out</button></div>
+<div class="ag">
+<div class="card"><h3>Subscription</h3><div class="rw"><span>Plan</span><span>PawPulse Plus</span></div><div class="rw"><span>Price</span><span>$9 / month</span></div><div class="rw"><span>Member since</span><span>Aug 3, 2026</span></div><div class="rw"><span>Next payment</span><span>Dec 12, 2026</span></div></div>
+<div class="card"><h3>My dog</h3><div class="rw"><span>Name</span><span>Max</span></div><div class="rw"><span>Breed</span><span>Labrador Retriever</span></div><div class="rw"><span>Age and weight</span><span>11 years · 31.2 kg</span></div><div class="rw"><span>Known conditions</span><span>Mild hip arthritis</span></div></div>
+<div class="card"><h3>Devices</h3><div class="rw"><span>Collar PP-C-48213</span><span>${paired?'Connected · 82%':'Not connected'}</span></div><div class="rw"><span>Collar firmware</span><span>2.4.1</span></div><div class="rw"><span>Bed PP-B-20977</span><span>${paired?'Online':'Not connected'}</span></div><div class="rw"><span>Bed firmware</span><span>1.9.3</span></div></div>
+<div class="card"><h3>Vet sharing</h3><div class="rw"><span>Vet</span><span>Dr. Olena Bondar</span></div><div class="rw"><span>Clinic</span><span>Happy Paws Vet</span></div><label class="tg"><span>Send weekly report on Mondays</span><input type="checkbox" checked></label></div>
+<div class="card"><h3>Notifications</h3><label class="tg"><span>Early warnings (push)</span><input type="checkbox" checked></label><label class="tg"><span>Daily Health Score summary</span><input type="checkbox" checked></label><label class="tg"><span>Low battery</span><input type="checkbox"></label></div>
+<div class="card"><h3>Health reports</h3><div class="rw"><span>October 2026</span><span>PDF · avg score 8.2</span></div><div class="rw"><span>September 2026</span><span>PDF · avg score 8.3</span></div><div class="rw"><span>August 2026</span><span>PDF · avg score 8.1</span></div></div>
+</div><p class="cap" style="margin-top:20px">Fake account for demonstration only. No data is stored or sent.</p>`;
+$('so').onclick=function(){user=null;paired=false;clearInterval(t);hist.length=0;S.bad=false;$('anom').textContent='Simulate a health change';['p1','p2'].forEach(function(i){var p=$(i);p.className='';p.lastChild.textContent='Not connected'});var pb=$('pairBtn');pb.disabled=false;pb.textContent='Connect collar and bed';location.hash='overview'}}
+$('lgBtn').addEventListener('click',function(){var b=this;b.disabled=true;b.textContent='Signing in…';setTimeout(function(){user={name:'Anna Kovalenko'};b.disabled=false;b.textContent='Sign in';gate()},900)});
+/* simulated pairing + live data */
+var S={hr:78,rr:19,srr:20,steps:6412,am:74,dist:4.8,kcal:412,tp:38.5,hs:8.4,bad:false},hist=[],t=null;
+function r(n){return Math.round(n)}
+$('pairBtn').addEventListener('click',function(){var b=this;b.disabled=true;b.textContent='Searching for devices…';
+setTimeout(function(){var p=$('p1');p.className='on';p.lastChild.textContent='Connected · 82%'},1200);
+setTimeout(function(){var p=$('p2');p.className='on';p.lastChild.textContent='Connected · online'},2200);
+setTimeout(function(){b.textContent='Syncing data…'},2300);
+setTimeout(function(){paired=true;gate();start()},3300)});
+function draw(){for(var i=0,d='';i<hist.length;i++){d+=(i?'L':'M')+(i*300/29).toFixed(1)+' '+(80-(hist[i]-60)*1.6).toFixed(1)}$('hrp').setAttribute('d',d)}
+function tick(){
+S.hr=Math.max(66,Math.min(S.bad?104:92,S.hr+(Math.random()*6-3)+(S.bad?.4:0)));
+S.steps+=Math.floor(Math.random()*5);S.am+=Math.random()<.1?1:0;S.dist=+(S.steps*.00075).toFixed(1);S.kcal=r(S.steps*.0642);
+var tr=S.bad?27:19;S.rr+=((tr+Math.random()*2-1)-S.rr)*.3;S.srr+=(((S.bad?26:20)+Math.random()-.5)-S.srr)*.3;
+S.tp=+(38.5+(S.bad?.5:0)+(Math.random()*.1-.05)).toFixed(1);
+hist.push(S.hr);if(hist.length>30)hist.shift();draw();
+$('hr').textContent=r(S.hr);$('rr').textContent=r(S.rr);$('srr').textContent=r(S.srr);$('tp').textContent=S.tp.toFixed(1);
+$('steps').textContent=S.steps.toLocaleString('en-US');$('am').textContent=S.am;$('dist').textContent=S.dist;$('kcal').textContent=S.kcal;
+$('hs').textContent=S.bad?'6.1':'8.4';
+$('hsn').textContent=S.bad?'Lower than usual. Down 2.3 over 5 days.':'Excellent for his age. Up 0.2 from yesterday.';
+$('st').textContent=S.bad?'Elevated':'Low';$('rl').textContent=S.bad?'High':'Low';$('sq').textContent=S.bad?'61':'87';
+$('srs').textContent=S.bad?'Up 25% vs baseline':'Baseline 19–22';$('srs').className='s'+(S.bad?' bad':'');
+$('rrs').textContent=S.bad?'Higher than usual':'Normal, under 30';$('rrs').className='s'+(S.bad?' bad':'');
+$('alerts').innerHTML=S.bad?'<div class="alert"><b>!</b><p><strong>Early warning:</strong> Sleeping breathing rate rose 25% over 5 nights, with more restlessness and a higher resting heart rate. This may point to pain or a heart problem. Consider booking a vet visit and sharing the report.</p></div>':'<div class="alert ok"><b>✓</b><p>All readings are within Max’s normal range. Deep sleep has been steady for 14 days.</p></div>'}
+function start(){for(var i=0;i<30;i++)hist.push(78+Math.random()*6-3);tick();t=setInterval(tick,1500)}
+$('anom').addEventListener('click',function(){S.bad=!S.bad;this.textContent=S.bad?'Back to normal':'Simulate a health change'});
+})();
+</script>
+</body>
+</html>
